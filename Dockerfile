@@ -33,6 +33,8 @@ RUN echo 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' > /et
     remoteip \
     rewrite \
     ssl \
+ && sed --in-place --regexp-extended --expression '/^Listen\s+80/s/80/47001/' /etc/apache2/ports.conf \
+ && sed --in-place --regexp-extended --expression '/<VirtualHost \*:80>/s/80/47001/' /etc/apache2/sites-enabled/000-default.conf \
  && apt-get autoremove --yes --purge \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -48,4 +50,4 @@ EXPOSE 1477
 
 CMD ["/etc/apache2/start.sh"]
 
-HEALTHCHECK --interval=60s --timeout=5s CMD curl --silent --location --fail http://localhost:80/ > /dev/null || exit 1
+HEALTHCHECK --interval=60s --timeout=5s CMD curl --silent --location --fail http://localhost:47001/ > /dev/null || exit 1

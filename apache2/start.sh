@@ -26,4 +26,6 @@ $(which apache2ctl) \
     -D ${HTTPD_REDIRECT:-HTTPD_REDIRECT_SSL}
 
 exec $(which vnstatd) \
-    --nodaemon
+    --group www-data \
+    --nodaemon \
+    --user www-data
