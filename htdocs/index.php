@@ -55,14 +55,14 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
           type: 'line',
           data: {
             datasets: [{
-              label: 'RX',
+              label: 'Receive',
               backgroundColor: 'rgba(255, 0, 0, 0.3)',
               borderColor: 'rgb(255, 0, 0)',
               borderWidth: 1,
               pointRadius: 2,
               fill: false
             }, {
-              label: 'TX',
+              label: 'Send',
               backgroundColor: 'rgba(0, 0, 255, 0.3)',
               borderColor: 'rgb(0, 0, 255)',
               borderWidth: 1,
@@ -73,7 +73,8 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
           options: {
             legend: {position: 'bottom'},
             scales: {
-              xAxes: [{display: true, type: 'time'}]
+              xAxes: [{display: true, type: 'time'}],
+              yAxes: [{display: true, scaleLabel: {display: true}}]
             }
           }
         };
@@ -83,6 +84,7 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
           $.get('src/action.php', {"func": "getReadings", "interface_id": $('select.id-interface_id').val(), "granularity": $('select.id-granularity').val()})
             .done(function(data) {
               if (data.success) {
+                config.options.scales.yAxes[0].scaleLabel.labelString = data.data.max.unit;
                 config.data.datasets[0].data = data.data.rx;
                 config.data.datasets[1].data = data.data.tx;
                 chart.update();

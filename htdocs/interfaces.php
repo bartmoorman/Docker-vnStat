@@ -28,18 +28,30 @@ $vnstat = new vnStat(true, true, true, false);
             <th>Interface Alias (Name)</th>
             <th>Created</th>
             <th>Updated</th>
+            <th>RX Counter</th>
+            <th>TX Counter</th>
+            <th>RX Total</th>
+            <th>TX Total</th>
           </tr>
         </thead>
         <tbody>
 <?php
 foreach ($vnstat->getInterfaces() as $interface) {
   $tableClass = $interface['active'] ? 'table-default' : 'text-warning';
+  $rxcounter = $vnstat->formatBytes($interface['rxcounter']);
+  $txcounter = $vnstat->formatBytes($interface['txcounter']);
+  $rxtotal = $vnstat->formatBytes($interface['rxtotal']);
+  $txtotal = $vnstat->formatBytes($interface['txtotal']);
   echo "          <tr class='{$tableClass}'>" . PHP_EOL;
   echo "            <td><button type='button' class='btn btn-sm btn-outline-info id-details' data-interface_id='{$interface['interface_id']}'>Details</button></td>" . PHP_EOL;
   echo "            <td>{$interface['interface_id']}</td>" . PHP_EOL;
   echo "            <td>{$interface['alias']} ({$interface['name']})</td>" . PHP_EOL;
   echo "            <td>{$interface['created']}</td>" . PHP_EOL;
   echo "            <td>{$interface['updated']}</td>" . PHP_EOL;
+  echo "            <td>{$rxcounter['size']} {$rxcounter['unit']}</td>" . PHP_EOL;
+  echo "            <td>{$txcounter['size']} {$txcounter['unit']}</td>" . PHP_EOL;
+  echo "            <td>{$rxtotal['size']} {$rxtotal['unit']}</td>" . PHP_EOL;
+  echo "            <td>{$txtotal['size']} {$txtotal['unit']}</td>" . PHP_EOL;
   echo "          </tr>" . PHP_EOL;
 }
 ?>

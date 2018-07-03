@@ -7,6 +7,9 @@ class vnStat {
   private $dbConn, $vnStatDbConn;
   public $pageLimit = 20;
   public $granularities = ['fiveminute' => 720, 'hour' => 24, 'day' => 30, 'month' => 12, 'year' => 0];
+  public $formatBase = 1024;
+  public $formatUnits = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  public $formatDecimals = 2;
 
   public function __construct($requireConfigured = true, $requireValidSession = true, $requireAdmin = true, $requireIndex = false) {
     session_start([
@@ -186,8 +189,23 @@ EOQ;
   }
 
   public function createInterface($name, $alias = null) {
-$query = <<<EOQ
+    $name = $this->vnStatDbConn->escapeString($name);
+    $alias = $this->vnStatDbConn->escapeString($alias);
+    $query = <<<EOQ
+SELECT COUNT(*)
+FROM `interface`
+WHERE `name` = '{$name}';
 EOQ;
+    if (!$this->vnStatDbConn->querySingle($query)) {
+      $query = <<<EOQ
+INSERT
+INTO `interface` (`name`, `alias`, `active`, `created`, `updated`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`)
+VALUES ('{$name}', '{$alias}', 1, DATETIME('now', 'localtime'), DATETIME('now', 'localtime'), 0, 0, 0, 0);
+EOQ;
+      if ($this->vnStatDbConn->exec($query)) {
+        return true;
+      }
+    }
     return false;
   }
 
@@ -229,8 +247,16 @@ EOQ;
   }
 
   public function updateInterface($interface_id, $alias = null) {
-$query = <<<EOQ
+    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
+    $alias = $this->vnStatDbConn->escapeString($alias);
+    $query = <<<EOQ
+UPDATE `interface`
+SET `alias` = '{$alias}'
+WHERE `id` = '{$interface_id}';
 EOQ;
+    if ($this->vnStatDbConn->exec($query)) {
+      return true;
+    }
     return false;
   }
 
@@ -269,8 +295,33 @@ EOQ;
   }
 
   public function modifyInterface($action, $interface_id) {
-$query = <<<EOQ
+    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
+    switch ($action) {
+      case 'enable':
+        $query = <<<EOQ
+UPDATE `interface`
+SET `active` = '1'
+WHERE `id` = '{$interface_id}';
 EOQ;
+        break;
+      case 'disable':
+        $query = <<<EOQ
+UPDATE `interface`
+SET `active` = '0'
+WHERE `id` = '{$interface_id}';
+EOQ;
+        break;
+      case 'delete':
+        $query = <<<EOQ
+DELETE
+FROM `interface`
+WHERE `id` = '{$interface_id}';
+EOQ;
+        break;
+    }
+    if ($this->vnStatDbConn->exec($query)) {
+      return true;
+    }
     return false;
   }
 
@@ -350,9 +401,18 @@ EOQ;
     return false;
   }
 
+  public function formatBytes($bytes) {
+    if ($bytes > 0) {
+      $multiple = floor(log($bytes) / log($this->formatBase));
+      $converted = round($bytes / pow($this->formatBase, $multiple), $this->formatDecimals);
+      return ['size' => $converted, 'unit' => $this->formatUnits[$multiple], 'multiple' => $multiple];
+    }
+    return ['size' => 0, 'unit' => $this->formatUnits[0], 'multiple' => 0];
+  }
+
   public function getInterfaces() {
     $query = <<<EOQ
-SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`, `created`, `updated`
+SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`, `created`, `updated`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
 FROM `interface`
 ORDER BY `name`;
 EOQ;
@@ -369,12 +429,31 @@ EOQ;
   public function getInterfaceDetails($interface_id) {
     $interface_id = $this->vnStatDbConn->escapeString($interface_id);
     $query = <<<EOQ
-SELECT `id` AS `interface_id`, `name`, `alias`, `active`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
+SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`, `created`, `updated`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
 FROM `interface`
 WHERE `id` = '{$interface_id}'
 EOQ;
     if ($interface = $this->vnStatDbConn->querySingle($query, true)) {
       return $interface;
+    }
+    return false;
+  }
+
+  public function getReadingsMax($interface_id, $granularity) {
+    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
+    $granularity = $this->vnStatDbConn->escapeString($granularity);
+    $query = <<<EOQ
+SELECT `rx`, `tx`
+FROM `{$granularity}`
+WHERE `interface` = '{$interface_id}'
+LIMIT {$this->granularities[$granularity]};
+EOQ;
+    if ($readings = $this->vnStatDbConn->query($query)) {
+      $max = 0;
+      while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
+        $max = max($max, $reading['rx'], $reading['tx']);
+      }
+      return $max;
     }
     return false;
   }
@@ -390,10 +469,12 @@ ORDER BY `date`
 LIMIT {$this->granularities[$granularity]};
 EOQ;
     if ($readings = $this->vnStatDbConn->query($query)) {
-      $output = ['rx' => [], 'tx' => []];
+      $max = $this->getReadingsMax($interface_id, $granularity);
+      $max = $this->formatBytes($max);
+      $output = ['rx' => [], 'tx' => [], 'max' => $max];
       while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
-        $output['rx'][] = ['x' => $reading['date'], 'y' => $reading['rx']];
-        $output['tx'][] = ['x' => $reading['date'], 'y' => $reading['tx']];
+        $output['rx'][] = ['x' => $reading['date'], 'y' => round($reading['rx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
+        $output['tx'][] = ['x' => $reading['date'], 'y' => round($reading['tx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
       }
       return $output;
     }
