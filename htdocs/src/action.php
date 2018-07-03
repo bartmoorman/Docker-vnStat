@@ -80,10 +80,29 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
+  case 'getInterfaceDetails':
+    if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
+      if (!empty($_REQUEST['interface_id'])) {
+        if ($output['data'] = $vnstat->getInterfaceDetails($_REQUEST['interface_id'])) {
+          $output['success'] = true;
+          $putEvent = false;
+        } else {
+          $output['success'] = false;
+          $log['interface_id'] = $_REQUEST['interface_id'];
+        }
+      } else {
+        $output['success'] = false;
+        $output['message'] = 'No interface id supplied';
+      }
+    } else {
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
   case 'getReadings':
     if ($vnstat->isValidSession()) {
-      if (!empty($_REQUEST['interface_id']) && !empty($_REQUEST['period'])) {
-        if ($output['data'] = $vnstat->getReadings($_REQUEST['interface_id'], $_REQUEST['period'])) {
+      if (!empty($_REQUEST['interface_id']) && !empty($_REQUEST['granularity'])) {
+        if ($output['data'] = $vnstat->getReadings($_REQUEST['interface_id'], $_REQUEST['granularity'])) {
           $output['success'] = true;
           $putEvent = false;
         } else {

@@ -3,8 +3,10 @@ ini_set('date.timezone', 'UTC');
 
 class vnStat {
   private $dbFile = '/config/vnstat.db';
-  private $dbConn;
+  private $vnStatDbFile = '/var/lib/vnstat/vnstat.db';
+  private $dbConn, $vnStatDbConn;
   public $pageLimit = 20;
+  public $granularities = ['fiveminute' => 720, 'hour' => 24, 'day' => 30, 'month' => 12, 'year' => 0];
 
   public function __construct($requireConfigured = true, $requireValidSession = true, $requireAdmin = true, $requireIndex = false) {
     session_start([
@@ -18,9 +20,9 @@ class vnStat {
     ]);
 
     if (is_writable($this->dbFile)) {
-      $this->connectDb();
+      $this->connectDb($this->dbConn, $this->dbFile);
     } elseif (is_writable(dirname($this->dbFile))) {
-      $this->connectDb();
+      $this->connectDb($this->dbConn, $this->dbFile);
       $this->initDb();
     }
 
@@ -38,12 +40,16 @@ class vnStat {
       header('Location: setup.php');
       exit;
     }
+
+    if (is_readable($this->vnStatDbFile)) {
+       $this->connectDb($this->vnStatDbConn, $this->vnStatDbFile);
+    }
   }
 
-  private function connectDb() {
-    if ($this->dbConn = new SQLite3($this->dbFile)) {
-      $this->dbConn->busyTimeout(500);
-      $this->dbConn->exec('PRAGMA journal_mode = WAL');
+  private function connectDb(&$conn, $file) {
+    if ($conn = new SQLite3($file)) {
+      $conn->busyTimeout(500);
+      $conn->exec('PRAGMA journal_mode = WAL');
       return true;
     }
     return false;
@@ -76,7 +82,7 @@ EOQ;
   }
 
   public function isConfigured() {
-    if ($this->getCount('users')) {
+    if ($this->getObjectCount('users')) {
       return true;
     }
     return false;
@@ -265,6 +271,7 @@ EOQ;
     }
     return false;
   }
+
   public function getUserDetails($user_id) {
     $user_id = $this->dbConn->escapeString($user_id);
     $query = <<<EOQ
@@ -278,7 +285,7 @@ EOQ;
     return false;
   }
 
-  public function getCount($type) {
+  public function getObjectCount($type) {
     $type = $this->dbConn->escapeString($type);
     $query = <<<EOQ
 SELECT COUNT(*)
@@ -326,19 +333,51 @@ EOQ;
   }
 
   public function getInterfaces() {
-    if ($interfaces = json_decode(shell_exec('vnstat --json'))) {
+    $query = <<<EOQ
+SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`
+FROM `interface`
+ORDER BY `name`;
+EOQ;
+    if ($interfaces = $this->vnStatDbConn->query($query)) {
       $output = [];
-      foreach ($interfaces->interfaces as $interface) {
-        $output[$interface->id] = $interface->nick;
+      while ($interface = $interfaces->fetchArray(SQLITE3_ASSOC)) {
+        $output[] = $interface;
       }
       return $output;
     }
     return false;
   }
 
-  public function getReadings($interface_id, $period) {
-    if ($readings = json_decode(shell_exec("vnstat --iface {$interface_id} --json"))) {
-      return $readings->interfaces[0]->traffic->$period;
+  public function getInterfaceDetails($interface_id) {
+    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
+    $query = <<<EOQ
+SELECT `id` AS `interface_id`, `name`, `alias`, `active`, `created`, `updated`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
+FROM `interface`
+WHERE `id` = '{$interface_id}'
+EOQ;
+    if ($interface = $this->vnStatDbConn->querySingle($query, true)) {
+      return $interface;
+    }
+    return false;
+  }
+
+  public function getReadings($interface_id, $granularity) {
+    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
+    $granularity = $this->vnStatDbConn->escapeString($granularity);
+    $query = <<<EOQ
+SELECT `date`, `rx`, `tx`
+FROM `{$granularity}`
+WHERE `interface` = '{$interface_id}'
+ORDER BY `date`
+LIMIT {$this->granularities[$granularity]};
+EOQ;
+    if ($readings = $this->vnStatDbConn->query($query)) {
+      $output = ['rx' => [], 'tx' => []];
+      while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
+        $output['rx'][] = ['x' => $reading['date'], 'y' => $reading['rx']];
+        $output['tx'][] = ['x' => $reading['date'], 'y' => $reading['tx']];
+      }
+      return $output;
     }
     return false;
   }

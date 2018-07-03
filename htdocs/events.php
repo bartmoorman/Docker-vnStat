@@ -15,7 +15,8 @@ $vnstat = new vnStat(true, true, true, false);
   <body>
     <nav class='navbar'>
       <button class='btn btn-sm btn-outline-success id-nav' data-href='<?php echo dirname($_SERVER['PHP_SELF']) ?>'>Home</button>
-      <button class='btn btn-sm btn-outline-info ml-auto mr-2 id-nav' data-href='users.php'>Users</button>
+      <button class='btn btn-sm btn-outline-info ml-auto mr-2 id-nav' data-href='interfaces.php'>Interfaces</button>
+      <button class='btn btn-sm btn-outline-info mr-2 id-nav' data-href='users.php'>Users</button>
       <button class='btn btn-sm btn-outline-info id-nav' data-href='events.php'>Events</button>
     </nav>
     <div class='container'>
@@ -51,7 +52,7 @@ foreach ($vnstat->getEvents($currentPage) as $event) {
     <nav>
       <ul class='pagination justify-content-center'>
 <?php
-$pages = ceil($vnstat->getCount('events') / $vnstat->pageLimit);
+$pages = ceil($vnstat->getObjectCount('events') / $vnstat->pageLimit);
 $group = ceil($currentPage / 5);
 $previousPage = $currentPage - 1;
 $nextPage = $currentPage + 1;

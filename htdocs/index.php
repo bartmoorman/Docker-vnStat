@@ -18,7 +18,8 @@ if ($vnstat->isAdmin()) {
   $homeLoc = dirname($_SERVER['PHP_SELF']);
   echo "    <nav class='navbar'>" . PHP_EOL;
   echo "      <button class='btn btn-sm btn-outline-success id-nav' data-href='{$homeLoc}'>Home</button>" . PHP_EOL;
-  echo "      <button class='btn btn-sm btn-outline-info ml-auto mr-2 id-nav' data-href='users.php'>Users</button>" . PHP_EOL;
+  echo "      <button class='btn btn-sm btn-outline-info ml-auto mr-2 id-nav' data-href='interfaces.php'>Interfaces</button>" . PHP_EOL;
+  echo "      <button class='btn btn-sm btn-outline-info mr-2 id-nav' data-href='users.php'>Users</button>" . PHP_EOL;
   echo "      <button class='btn btn-sm btn-outline-info id-nav' data-href='events.php'>Events</button>" . PHP_EOL;
   echo "    </nav>" . PHP_EOL;
 }
@@ -26,19 +27,18 @@ if ($vnstat->isAdmin()) {
     <canvas id='chart'></canvas>
     <nav class='navbar text-center'>
       <select class='btn btn-sm btn-outline-success ml-auto mr-2 id-interface_id' data-storage='interface_id'>
-        <option value=''>Interface</option>
+        <option value='0'>Interface</option>
 <?php
-foreach ($vnstat->getInterfaces() as $interface_id => $nick) {
-  echo "        <option value='{$interface_id}'>{$nick}</option>" . PHP_EOL;
+foreach ($vnstat->getInterfaces() as $interface) {
+  echo "        <option value='{$interface['interface_id']}'>{$interface['alias']} ({$interface['name']})</option>" . PHP_EOL;
 }
 ?>
       </select>
-      <select class='btn btn-sm btn-outline-success mr-auto id-period' data-storage='period'>
-        <option value=''>Period</option>
+      <select class='btn btn-sm btn-outline-success mr-auto id-granularity' data-storage='granularity'>
+        <option value=''>Granularity</option>
 <?php
-$periods = ['hours', 'days', 'months'];
-foreach ($periods as $period) {
-  echo "        <option value='{$period}'>{$period}</option>" . PHP_EOL;
+foreach (array_keys($vnstat->granularities) as $granularity) {
+  echo "        <option value='{$granularity}'>{$granularity}</option>" . PHP_EOL;
 }
 ?>
       </select>
@@ -52,50 +52,39 @@ foreach ($periods as $period) {
       $(document).ready(function() {
         var timer;
         var config = {
-          type: 'bar',
+          type: 'line',
           data: {
             datasets: [{
-              label: 'In',
+              label: 'RX',
               backgroundColor: 'rgba(255, 0, 0, 0.3)',
               borderColor: 'rgb(255, 0, 0)',
-              borderWidth: 1
+              borderWidth: 1,
+              pointRadius: 2,
+              fill: false
             }, {
-              label: 'Out',
+              label: 'TX',
               backgroundColor: 'rgba(0, 0, 255, 0.3)',
               borderColor: 'rgb(0, 0, 255)',
-              borderWidth: 1
+              borderWidth: 1,
+              pointRadius: 2,
+              fill: false
             }]
           },
           options: {
             legend: {position: 'bottom'},
+            scales: {
+              xAxes: [{display: true, type: 'time'}]
+            }
           }
         };
         var chart = new Chart($('#chart'), config);
 
         function getReadings() {
-          $.get('src/action.php', {"func": "getReadings", "interface_id": $('select.id-interface_id').val(), "period": $('select.id-period').val()})
+          $.get('src/action.php', {"func": "getReadings", "interface_id": $('select.id-interface_id').val(), "granularity": $('select.id-granularity').val()})
             .done(function(data) {
               if (data.success) {
-                config.data.labels = [];
-                config.data.datasets[0].data = [];
-                config.data.datasets[1].data = [];
-                $.each(data.data, function(key, value) {
-                  value.date.month--;
-                  switch ($('select.id-period').val()) {
-                    case 'hours':
-                      value.date.hour = value.id;
-                      config.data.labels.push(moment(value.date).format('ddd-HH'));
-                      break;
-                    case 'days':
-                      config.data.labels.push(moment(value.date).format('MMM-DD'));
-                      break;
-                    case 'months':
-                      config.data.labels.push(moment(value.date).format('MMM'));
-                      break;
-                  }
-                  config.data.datasets[0].data.push(value.rx);
-                  config.data.datasets[1].data.push(value.tx);
-                });
+                config.data.datasets[0].data = data.data.rx;
+                config.data.datasets[1].data = data.data.tx;
                 chart.update();
               }
             })
@@ -107,20 +96,20 @@ foreach ($periods as $period) {
             });
         };
 
-        $.each(['interface_id', 'period'], function(key, value) {
+        $.each(['interface_id', 'granularity'], function(key, value) {
           if (result = sessionStorage.getItem(value)) {
             $(`select.id-${value}`).val(result);
           }
         });
 
-        if ($('select.id-interface_id').val() != 0 && $('select.id-period').val() != 0) {
+        if ($('select.id-interface_id').val() != 0 && $('select.id-granularity').val()) {
           getReadings();
         }
 
-        $('select.id-interface_id, select.id-period').change(function() {
+        $('select.id-interface_id, select.id-granularity').change(function() {
           clearTimeout(timer);
           sessionStorage.setItem($(this).data('storage'), $(this).val());
-          if ($('select.id-interface_id').val() != 0 && $('select.id-period').val() != 0) {
+          if ($('select.id-interface_id').val() != 0 && $('select.id-granularity').val()) {
             getReadings();
           }
         });
