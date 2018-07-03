@@ -30,6 +30,20 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
+  case 'createInterface':
+    if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
+      if (!empty($_REQUEST['name'])) {
+        $alias = !empty($_REQUEST['alias']) ? $_REQUEST['alias'] : null;
+        $output['success'] = $vnstat->createInterface($_REQUEST['name'], $alias);
+      } else {
+        $output['success'] = false;
+        $output['message'] = 'No name supplied';
+      }
+    } else {
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
   case 'updateUser':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
       if (!empty($_REQUEST['user_id']) && !empty($_REQUEST['username']) && !empty($_REQUEST['first_name']) && !empty($_REQUEST['role'])) {
@@ -46,12 +60,42 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
+  case 'updateInterface':
+    if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
+      if (!empty($_REQUEST['interface_id'])) {
+        $alias = !empty($_REQUEST['alias']) ? $_REQUEST['alias'] : null;
+        $output['success'] = $vnstat->updateInterface($_REQUEST['interface_id'], $alias);
+        $log['interface_id'] = $_REQUEST['interface_id'];
+      } else {
+        $output['success'] = false;
+        $output['message'] = 'No interface id supplied';
+      }
+    } else {
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
   case 'modifyUser':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
       if (!empty($_REQUEST['action']) && !empty($_REQUEST['user_id'])) {
         $output['success'] = $vnstat->modifyUser($_REQUEST['action'], $_REQUEST['user_id']);
         $log['action'] = $_REQUEST['action'];
         $log['user_id'] = $_REQUEST['user_id'];
+      } else {
+        $output['success'] = false;
+        $output['message'] = 'Missing arguments';
+      }
+    } else {
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
+  case 'modifyInterface':
+    if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
+      if (!empty($_REQUEST['action']) && !empty($_REQUEST['interface_id'])) {
+        $output['success'] = $vnstat->modifyInterface($_REQUEST['action'], $_REQUEST['interface_id']);
+        $log['action'] = $_REQUEST['action'];
+        $log['interface_id'] = $_REQUEST['interface_id'];
       } else {
         $output['success'] = false;
         $output['message'] = 'Missing arguments';

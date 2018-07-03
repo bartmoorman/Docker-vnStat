@@ -26,6 +26,8 @@ $vnstat = new vnStat(true, true, true, false);
             <th><button type='button' class='btn btn-sm btn-outline-success id-add'>Add</button></th>
             <th>Interface ID</th>
             <th>Interface Alias (Name)</th>
+            <th>Created</th>
+            <th>Updated</th>
           </tr>
         </thead>
         <tbody>
@@ -36,6 +38,8 @@ foreach ($vnstat->getInterfaces() as $interface) {
   echo "            <td><button type='button' class='btn btn-sm btn-outline-info id-details' data-interface_id='{$interface['interface_id']}'>Details</button></td>" . PHP_EOL;
   echo "            <td>{$interface['interface_id']}</td>" . PHP_EOL;
   echo "            <td>{$interface['alias']} ({$interface['name']})</td>" . PHP_EOL;
+  echo "            <td>{$interface['created']}</td>" . PHP_EOL;
+  echo "            <td>{$interface['updated']}</td>" . PHP_EOL;
   echo "          </tr>" . PHP_EOL;
 }
 ?>
@@ -58,6 +62,26 @@ foreach ($vnstat->getInterfaces() as $interface) {
                 <div class='form-group col'>
                   <label>Interface Alias</label>
                   <input class='form-control' id='alias' type='text' name='alias'>
+                </div>
+              </div>
+              <div class='form-row'>
+                <div class='form-group col'>
+                  <label>RX Counter</label>
+                  <input class='form-control' id='rxcounter' type='number' name='rxcounter' disabled>
+                </div>
+                <div class='form-group col'>
+                  <label>TX Counter</label>
+                  <input class='form-control' id='txcounter' type='number' name='txcounter' disabled>
+                </div>
+              </div>
+              <div class='form-row'>
+                <div class='form-group col'>
+                  <label>RX Total</label>
+                  <input class='form-control' id='rxtotal' type='number' name='rxtotal' disabled>
+                </div>
+                <div class='form-group col'>
+                  <label>TX Total</label>
+                  <input class='form-control' id='txtotal' type='number' name='txtotal' disabled>
                 </div>
               </div>
             </div>
@@ -100,6 +124,10 @@ foreach ($vnstat->getInterfaces() as $interface) {
                 $('form').data('interface_id', interface.interface_id);
                 $('#name').val(interface.name);
                 $('#alias').val(interface.alias);
+                $('#rxcounter').val(interface.rxcounter);
+                $('#txcounter').val(interface.txcounter);
+                $('#rxtotal').val(interface.rxtotal);
+                $('#txtotal').val(interface.txtotal);
                 $('button.id-modify.id-volatile').data('action', interface.active ? 'disable' : 'enable').text(interface.active ? 'Disable' : 'Enable');
                 $('button.id-modify').data('interface_id', interface.interface_id);
                 $('div.id-modal').modal('toggle');
@@ -112,7 +140,7 @@ foreach ($vnstat->getInterfaces() as $interface) {
 
        $('button.id-modify').click(function() {
           if (confirm(`Want to ${$(this).data('action').toUpperCase()} interface ${$(this).data('interface_id')}?`)) {
-            $.get('src/action.php', {"func": "modifyInterface", "action": $(this).data('action'), "type": "interface_id", "value": $(this).data('interface_id')})
+            $.get('src/action.php', {"func": "modifyInterface", "action": $(this).data('action'), "interface_id": $(this).data('interface_id')})
               .done(function(data) {
                 if (data.success) {
                   location.reload();
@@ -126,7 +154,7 @@ foreach ($vnstat->getInterfaces() as $interface) {
 
         $('form').submit(function(e) {
           e.preventDefault();
-          $.post('src/action.php', {"func": $(this).data('func'), "interface_id": $(this).data('interface_id'), "name": $('#name').val()})
+          $.post('src/action.php', {"func": $(this).data('func'), "interface_id": $(this).data('interface_id'), "name": $('#name').val(), "alias": $('#alias').val()})
             .done(function(data) {
               if (data.success) {
                 location.reload();

@@ -185,6 +185,12 @@ EOQ;
     return false;
   }
 
+  public function createInterface($name, $alias = null) {
+$query = <<<EOQ
+EOQ;
+    return false;
+  }
+
   public function updateUser($user_id, $username, $password = null, $first_name, $last_name = null, $role) {
     $user_id = $this->dbConn->escapeString($user_id);
     $username = $this->dbConn->escapeString($username);
@@ -222,6 +228,12 @@ EOQ;
     return false;
   }
 
+  public function updateInterface($interface_id, $alias = null) {
+$query = <<<EOQ
+EOQ;
+    return false;
+  }
+
   public function modifyUser($action, $user_id) {
     $user_id = $this->dbConn->escapeString($user_id);
     switch ($action) {
@@ -253,6 +265,12 @@ EOQ;
     if ($this->dbConn->exec($query)) {
       return true;
     }
+    return false;
+  }
+
+  public function modifyInterface($action, $interface_id) {
+$query = <<<EOQ
+EOQ;
     return false;
   }
 
@@ -334,7 +352,7 @@ EOQ;
 
   public function getInterfaces() {
     $query = <<<EOQ
-SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`
+SELECT `id` AS `interface_id`, `name`, IFNULL(`alias`, `name`) AS `alias`, `active`, `created`, `updated`
 FROM `interface`
 ORDER BY `name`;
 EOQ;
@@ -351,7 +369,7 @@ EOQ;
   public function getInterfaceDetails($interface_id) {
     $interface_id = $this->vnStatDbConn->escapeString($interface_id);
     $query = <<<EOQ
-SELECT `id` AS `interface_id`, `name`, `alias`, `active`, `created`, `updated`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
+SELECT `id` AS `interface_id`, `name`, `alias`, `active`, `rxcounter`, `txcounter`, `rxtotal`, `txtotal`
 FROM `interface`
 WHERE `id` = '{$interface_id}'
 EOQ;
