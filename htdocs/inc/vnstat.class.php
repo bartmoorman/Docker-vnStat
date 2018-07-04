@@ -6,7 +6,7 @@ class vnStat {
   private $vnStatDbFile = '/var/lib/vnstat/vnstat.db';
   private $dbConn, $vnStatDbConn;
   public $pageLimit = 20;
-  public $granularities = ['fiveminute' => 720, 'hour' => 24, 'day' => 30, 'month' => 12, 'year' => 0];
+  public $granularities = ['fiveminute' => 72, 'hour' => 24, 'day' => 30, 'month' => 12, 'year' => 0];
   public $formatBase = 1024;
   public $formatUnits = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
   public $formatDecimals = 2;
@@ -474,7 +474,7 @@ EOQ;
       $output = ['rx' => [], 'tx' => [], 'max' => $max];
       while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
         $output['rx'][] = ['x' => $reading['date'], 'y' => round($reading['rx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
-        $output['tx'][] = ['x' => $reading['date'], 'y' => round($reading['tx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
+        $output['tx'][] = ['x' => $reading['date'], 'y' => -1 * round($reading['tx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
       }
       return $output;
     }

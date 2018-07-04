@@ -58,16 +58,12 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
               label: 'Receive',
               backgroundColor: 'rgba(255, 0, 0, 0.3)',
               borderColor: 'rgb(255, 0, 0)',
-              borderWidth: 1,
-              pointRadius: 2,
-              fill: false
+              borderWidth: 2
             }, {
               label: 'Send',
               backgroundColor: 'rgba(0, 0, 255, 0.3)',
               borderColor: 'rgb(0, 0, 255)',
-              borderWidth: 1,
-              pointRadius: 2,
-              fill: false
+              borderWidth: 2
             }]
           },
           options: {
