@@ -80,7 +80,7 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
           $.get('src/action.php', {"func": "getReadings", "interface_id": $('select.id-interface_id').val(), "granularity": $('select.id-granularity').val()})
             .done(function(data) {
               if (data.success) {
-                config.options.scales.yAxes[0].scaleLabel.labelString = data.data.max.unit;
+                config.options.scales.yAxes[0].scaleLabel.labelString = data.data.unit;
                 config.data.datasets[0].data = data.data.rx;
                 config.data.datasets[1].data = data.data.tx;
                 chart.update();

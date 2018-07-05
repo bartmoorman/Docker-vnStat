@@ -7,9 +7,7 @@ class vnStat {
   private $dbConn, $vnStatDbConn;
   public $pageLimit = 20;
   public $granularities = ['fiveminute' => 72, 'hour' => 24, 'day' => 30, 'month' => 12, 'year' => 0];
-  public $formatBase = 1024;
-  public $formatUnits = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-  public $formatDecimals = 2;
+  public $formatBytes = ['base' => 1024, 'units' => ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'], 'decimals' => 2];
 
   public function __construct($requireConfigured = true, $requireValidSession = true, $requireAdmin = true, $requireIndex = false) {
     session_start([
@@ -401,13 +399,37 @@ EOQ;
     return false;
   }
 
-  public function formatBytes($bytes) {
-    if ($bytes > 0) {
-      $multiple = floor(log($bytes) / log($this->formatBase));
-      $converted = round($bytes / pow($this->formatBase, $multiple), $this->formatDecimals);
-      return ['size' => $converted, 'unit' => $this->formatUnits[$multiple], 'multiple' => $multiple];
+  public function formatBytes($bytes, $return_array = false) {
+    if ($bytes >= $this->formatBytes['base']) {
+      $multiple = floor(log($bytes) / log($this->formatBytes['base']));
+      $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
+      if ($return_array) {
+        return ['size' => $converted, 'unit' => $this->formatBytes['units'][$multiple], 'multiple' => $multiple];
+      } else {
+        return "{$converted} {$this->formatBytes['units'][$multiple]}";
+      }
     }
-    return ['size' => 0, 'unit' => $this->formatUnits[0], 'multiple' => 0];
+    if ($return_array) {
+      return ['size' => $bytes, 'unit' => $this->formatBytes['units'][0], 'multiple' => 0];
+    } else {
+      return "{$bytes} {$this->formatBytes['units'][0]}";
+    }
+  }
+
+  public function reduceBytes($bytes, $multiple, $with_unit = false) {
+    if ($bytes > 0 && $multiple > 0) {
+      $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
+      if ($with_unit) {
+        return "{$converted} {$this->formatBytes['units'][$multiple]}";
+      } else {
+        return $converted;
+      }
+    }
+    if ($with_unit) {
+      return "{$bytes} {$this->formatBytes['units'][$multiple]}";
+    } else {
+      return $bytes;
+    }
   }
 
   public function getInterfaces() {
@@ -439,25 +461,6 @@ EOQ;
     return false;
   }
 
-  public function getReadingsMax($interface_id, $granularity) {
-    $interface_id = $this->vnStatDbConn->escapeString($interface_id);
-    $granularity = $this->vnStatDbConn->escapeString($granularity);
-    $query = <<<EOQ
-SELECT `rx`, `tx`
-FROM `{$granularity}`
-WHERE `interface` = '{$interface_id}'
-LIMIT {$this->granularities[$granularity]};
-EOQ;
-    if ($readings = $this->vnStatDbConn->query($query)) {
-      $max = 0;
-      while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
-        $max = max($max, $reading['rx'], $reading['tx']);
-      }
-      return $max;
-    }
-    return false;
-  }
-
   public function getReadings($interface_id, $granularity) {
     $interface_id = $this->vnStatDbConn->escapeString($interface_id);
     $granularity = $this->vnStatDbConn->escapeString($granularity);
@@ -465,16 +468,19 @@ EOQ;
 SELECT `date`, `rx`, `tx`
 FROM `{$granularity}`
 WHERE `interface` = '{$interface_id}'
-ORDER BY `date`
+ORDER BY `date` DESC
 LIMIT {$this->granularities[$granularity]};
 EOQ;
     if ($readings = $this->vnStatDbConn->query($query)) {
-      $max = $this->getReadingsMax($interface_id, $granularity);
-      $max = $this->formatBytes($max);
-      $output = ['rx' => [], 'tx' => [], 'max' => $max];
+      $max = 0;
       while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
-        $output['rx'][] = ['x' => $reading['date'], 'y' => round($reading['rx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
-        $output['tx'][] = ['x' => $reading['date'], 'y' => -1 * round($reading['tx'] / pow($this->formatBase, $max['multiple']), $this->formatDecimals)];
+        $max = max($max, $reading['rx'], $reading['tx']);
+      }
+      $max = $this->formatBytes($max, true);
+      $output = ['rx' => [], 'tx' => [], 'unit' => $max['unit']];
+      while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
+        $output['rx'][] = ['x' => $reading['date'], 'y' => $this->reduceBytes($reading['rx'], $max['multiple'])];
+        $output['tx'][] = ['x' => $reading['date'], 'y' => $this->reduceBytes($reading['tx'], $max['multiple']) * -1];
       }
       return $output;
     }
