@@ -95,8 +95,10 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
         };
 
         $.each(['interface_id', 'granularity'], function(key, value) {
-          if (result = sessionStorage.getItem(value)) {
-            $(`select.id-${value}`).val(result);
+          if (result = localStorage.getItem(value)) {
+            if ($(`select.id-${value} option[value="${result}"]`).length) {
+              $(`select.id-${value}`).val(result);
+            }
           }
         });
 
@@ -106,9 +108,14 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
 
         $('select.id-interface_id, select.id-granularity').change(function() {
           clearTimeout(timer);
-          sessionStorage.setItem($(this).data('storage'), $(this).val());
+          localStorage.setItem($(this).data('storage'), $(this).val());
           if ($('select.id-interface_id').val() != 0 && $('select.id-granularity').val()) {
             getReadings();
+          } else {
+            delete config.options.scales.yAxes[0].scaleLabel.labelString;
+            delete config.data.datasets[0].data;
+            delete config.data.datasets[1].data;
+            chart.update();
           }
         });
 
