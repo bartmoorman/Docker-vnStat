@@ -480,7 +480,7 @@ EOQ;
       $output = ['rx' => [], 'tx' => [], 'unit' => $max['unit']];
       while ($reading = $readings->fetchArray(SQLITE3_ASSOC)) {
         $output['rx'][] = ['x' => $reading['date'], 'y' => $this->reduceBytes($reading['rx'], $max['multiple'])];
-        $output['tx'][] = ['x' => $reading['date'], 'y' => $this->reduceBytes($reading['tx'], $max['multiple']) * -1];
+        $output['tx'][] = ['x' => $reading['date'], 'y' => $this->reduceBytes($reading['tx'], $max['multiple'])];
       }
       return $output;
     }
