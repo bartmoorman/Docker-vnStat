@@ -13,12 +13,9 @@ $vnstat = new vnStat(true, true, true, false);
     <link rel='stylesheet' href='//use.fontawesome.com/releases/v5.1.0/css/all.css' integrity='sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt' crossorigin='anonymous'>
   </head>
   <body>
-    <nav class='navbar'>
-      <button class='btn btn-sm btn-outline-success id-nav' data-href='<?php echo dirname($_SERVER['PHP_SELF']) ?>'>Home</button>
-      <button class='btn btn-sm btn-outline-info ml-auto mr-2 id-nav' data-href='interfaces.php'>Interfaces</button>
-      <button class='btn btn-sm btn-outline-info mr-2 id-nav' data-href='users.php'>Users</button>
-      <button class='btn btn-sm btn-outline-info id-nav' data-href='events.php'>Events</button>
-    </nav>
+<?php
+include_once('header.php');
+?>
     <div class='container'>
       <table class='table table-striped table-hover table-sm'>
         <thead>
@@ -57,17 +54,17 @@ foreach ($vnstat->getUsers() as $user) {
             <div class='modal-body'>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Username <sup class='text-danger'>*</sup></label>
+                  <label>Username <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='username' type='text' name='username' pattern='[A-za-z0-9]+' required>
                 </div>
                 <div class='form-group col'>
-                  <label>Password <sup class='text-danger id-required'>*</sup></label>
+                  <label>Password <sup class='text-danger id-required' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control id-password' id='password' type='password' name='password' minlength='6' required>
                 </div>
               </div>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>First Name <sup class='text-danger'>*</sup></label>
+                  <label>First Name <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='first_name' type='text' name='first_name' required>
                 </div>
                 <div class='form-group col'>
@@ -77,7 +74,7 @@ foreach ($vnstat->getUsers() as $user) {
               </div>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Role <sup class='text-danger'>*</sup></label>
+                  <label>Role <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <select class='form-control' id='role' name='role' required>
                     <option value='user'>user</option>
                     <option value='admin'>admin</option>
@@ -100,6 +97,8 @@ foreach ($vnstat->getUsers() as $user) {
     <script src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js' integrity='sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T' crossorigin='anonymous'></script>
     <script>
       $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+
         $('button.id-add').click(function() {
           $('h5.modal-title').text('Add User');
           $('form').removeData('user_id').data('func', 'createUser').trigger('reset');
@@ -109,6 +108,7 @@ foreach ($vnstat->getUsers() as $user) {
           $('button.id-submit').removeClass('btn-info').addClass('btn-success').text('Add');
           $('div.id-modal').modal('toggle');
         });
+
         $('button.id-details').click(function() {
           $('h5.modal-title').text('User Details');
           $('form').removeData('user_id').data('func', 'updateUser').trigger('reset');
@@ -134,6 +134,7 @@ foreach ($vnstat->getUsers() as $user) {
               console.log(`getUserDetails failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
             });
         });
+
         $('button.id-modify').click(function() {
           if (confirm(`Want to ${$(this).data('action').toUpperCase()} user ${$(this).data('user_id')}?`)) {
             $.get('src/action.php', {"func": "modifyUser", "action": $(this).data('action'), "user_id": $(this).data('user_id')})
@@ -143,10 +144,11 @@ foreach ($vnstat->getUsers() as $user) {
                 }
               })
               .fail(function(jqxhr, textStatus, errorThrown) {
-                console.log(`removeUser failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
+                console.log(`modifyUser failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
               });
           }
         });
+
         $('form').submit(function(e) {
           e.preventDefault();
           $.post('src/action.php', {"func": $(this).data('func'), "user_id": $(this).data('user_id'), "username": $('#username').val(), "password": $('#password').val(), "first_name": $('#first_name').val(), "last_name": $('#last_name').val(), "role": $('#role').val()})
@@ -159,6 +161,7 @@ foreach ($vnstat->getUsers() as $user) {
               console.log(`${$(this).data('func')} failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
             });
         });
+
         $('button.id-nav').click(function() {
           location.href=$(this).data('href');
         });

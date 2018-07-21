@@ -13,7 +13,7 @@ $vnstat = new vnStat(false, true, false, true);
     <link rel='stylesheet' href='//use.fontawesome.com/releases/v5.1.0/css/all.css' integrity='sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt' crossorigin='anonymous'>
   </head>
   <body>
-    <div class='modal d-block'>
+    <div class='modal fade'>
       <div class='modal-dialog modal-dialog-centered'>
         <div class='modal-content'>
           <form>
@@ -23,17 +23,17 @@ $vnstat = new vnStat(false, true, false, true);
             <div class='modal-body'>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Username <sup class='text-danger'>*</sup></label>
+                  <label>Username <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='username' type='text' name='username' pattern='[A-Za-z0-9]+' autofocus required>
                 </div>
                 <div class='form-group col'>
-                  <label>Password <sup class='text-danger'>*</sup></label>
+                  <label>Password <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='password' type='password' name='password' minlength='6' required>
                 </div>
               </div>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>First Name <sup class='text-danger'>*</sup></label>
+                  <label>First Name <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='first_name' type='text' name='first_name' required>
                 </div>
                 <div class='form-group col'>
@@ -43,7 +43,7 @@ $vnstat = new vnStat(false, true, false, true);
               </div>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Role <sup class='text-danger'>*</sup></label>
+                  <label>Role <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup> <sup class='text-info' data-toggle='tooltip' title='Informational'>*</sup></label>
                   <input class='form-control' id='role' type='text' name='role' value='admin' readonly required>
                 </div>
               </div>
@@ -60,6 +60,10 @@ $vnstat = new vnStat(false, true, false, true);
     <script src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js' integrity='sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T' crossorigin='anonymous'></script>
     <script>
       $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $('div.modal').modal({backdrop: false, keyboard: false});
+
         $('form').submit(function(e) {
           e.preventDefault();
           $.post('src/action.php', {"func": "createUser", "username": $('#username').val(), "password": $('#password').val(), "first_name": $('#first_name').val(), "last_name": $('#last_name').val(), "role": $('#role').val()})

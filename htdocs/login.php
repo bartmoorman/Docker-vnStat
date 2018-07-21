@@ -13,18 +13,22 @@ $vnstat = new vnStat(true, false, false, true);
     <link rel='stylesheet' href='//use.fontawesome.com/releases/v5.1.0/css/all.css' integrity='sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt' crossorigin='anonymous'>
   </head>
   <body>
-    <div class='modal d-block'>
+    <div class='modal fade'>
       <div class='modal-dialog modal-sm modal-dialog-centered'>
         <div class='modal-content'>
           <form>
             <div class='modal-body'>
-              <div class='form-group'>
-                <label>Username</label>
-                <input class='form-control form-control-lg' id='username' type='text' name='username' autofocus required>
+              <div class='form-row'>
+                <div class='form-group col'>
+                  <label>Username</label>
+                  <input class='form-control form-control-lg' id='username' type='text' name='username' autofocus required>
+                </div>
               </div>
-              <div class='form-group'>
-                <label>Password</label>
-                <input class='form-control form-control-lg' id='password' type='password' name='password' required>
+              <div class='form-row'>
+                <div class='form-group col'>
+                  <label>Password</label>
+                  <input class='form-control form-control-lg' id='password' type='password' name='password' required>
+                </div>
               </div>
             </div>
             <div class='modal-footer'>
@@ -39,6 +43,8 @@ $vnstat = new vnStat(true, false, false, true);
     <script src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js' integrity='sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T' crossorigin='anonymous'></script>
     <script>
       $(document).ready(function() {
+        $('div.modal').modal({backdrop: false, keyboard: false});
+
         $('form').submit(function(e) {
           e.preventDefault();
           $('button.id-login').prop('disabled', true);
@@ -49,7 +55,7 @@ $vnstat = new vnStat(true, false, false, true);
               }
             })
             .fail(function(jqxhr, textStatus, errorThrown) {
-              console.log(`createUser failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
+              console.log(`authenticateSession failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
             })
             .always(function() {
               $('button.id-login').prop('disabled', false);
