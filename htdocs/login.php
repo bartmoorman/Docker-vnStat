@@ -39,6 +39,7 @@ $vnstat = new vnStat(true, false, false, true);
       </div>
     </div>
     <script src='//code.jquery.com/jquery-3.3.1.min.js' integrity='sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT' crossorigin='anonymous'></script>
+    <script src='//code.jquery.com/ui/1.12.1/jquery-ui.min.js' integrity='sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX' crossorigin='anonymous'></script>
     <script src='//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js' integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49' crossorigin='anonymous'></script>
     <script src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js' integrity='sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T' crossorigin='anonymous'></script>
     <script>
@@ -52,6 +53,8 @@ $vnstat = new vnStat(true, false, false, true);
             .done(function(data) {
               if (data.success) {
                 location.href = '<?php echo dirname($_SERVER['PHP_SELF']) ?>';
+              } else {
+                $('div.modal').effect('shake');
               }
             })
             .fail(function(jqxhr, textStatus, errorThrown) {
