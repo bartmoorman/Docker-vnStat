@@ -21,11 +21,11 @@ if [ -f ${pidfile} ]; then
     fi
 fi
 
-$(which apache2ctl) \
+$(which vnstatd) \
+    --group www-data \
+    --user www-data
+
+exec $(which apache2ctl) \
+    -D FOREGROUND \
     -D ${HTTPD_SECURITY:-HTTPD_SSL} \
     -D ${HTTPD_REDIRECT:-HTTPD_REDIRECT_SSL}
-
-exec $(which vnstatd) \
-    --group www-data \
-    --nodaemon \
-    --user www-data

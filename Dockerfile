@@ -2,15 +2,15 @@ FROM bmoorman/ubuntu:bionic AS builder
 
 ARG DEBIAN_FRONTEND="noninteractive"
 
-WORKDIR /opt
+WORKDIR /opt/vnstat
 
 RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
     build-essential \
     curl \
     libsqlite3-dev \
- && curl --silent --location "https://github.com/vergoh/vnstat/archive/master.tar.gz" | tar xz \
- && cd vnstat-master && ./configure && make
+ && curl --silent --location "https://github.com/vergoh/vnstat/archive/master.tar.gz" | tar xz --strip-components 1 \
+ && ./configure && make
 
 FROM bmoorman/ubuntu:bionic
 
@@ -47,8 +47,8 @@ RUN echo 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' > /et
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=builder /opt/vnstat-master/vnstat /usr/bin
-COPY --from=builder /opt/vnstat-master/vnstatd /usr/sbin
+COPY --from=builder /opt/vnstat/vnstat /usr/bin
+COPY --from=builder /opt/vnstat/vnstatd /usr/sbin
 COPY apache2/ /etc/apache2/
 COPY htdocs/ /var/www/html/
 

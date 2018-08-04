@@ -1,6 +1,4 @@
 <?php
-ini_set('date.timezone', 'UTC');
-
 class vnStat {
   private $dbFile = '/config/vnstat.db';
   private $vnStatDbFile = '/var/lib/vnstat/vnstat.db';
@@ -383,7 +381,7 @@ EOQ;
   public function getEvents($page = 1) {
     $start = ($page - 1) * $this->pageLimit;
     $query = <<<EOQ
-SELECT `event_id`, STRFTIME('%s', `date`, 'unixepoch', 'localtime') AS `date`, `user_id`, `first_name`, `last_name`, `action`, `message`, `remote_addr`, `disabled`
+SELECT `event_id`, STRFTIME('%s', `date`, 'unixepoch') AS `date`, `user_id`, `first_name`, `last_name`, `action`, `message`, `remote_addr`, `disabled`
 FROM `events`
 LEFT JOIN `users` USING (`user_id`)
 ORDER BY `date` DESC
