@@ -43,7 +43,7 @@ $vnstat = new vnStat(false, true, false, true);
               </div>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Role <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup> <sup class='text-info' data-toggle='tooltip' title='Informational'>*</sup></label>
+                  <label>Role <sup class='text-danger' data-toggle='tooltip' title='Required'>*</sup></label>
                   <input class='form-control' id='role' type='text' name='role' value='admin' readonly required>
                 </div>
               </div>
