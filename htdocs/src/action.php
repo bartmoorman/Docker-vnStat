@@ -12,6 +12,7 @@ switch ($_REQUEST['func']) {
       $output['success'] = $vnstat->authenticateSession($_REQUEST['username'], $_REQUEST['password']);
       $log['username'] = $_REQUEST['username'];
     } else {
+      header('HTTP/1.1 400 Bad Request');
       $output['success'] = false;
       $output['message'] = 'Missing arguments';
     }
@@ -22,10 +23,12 @@ switch ($_REQUEST['func']) {
         $last_name = !empty($_REQUEST['last_name']) ? $_REQUEST['last_name'] : null;
         $output['success'] = $vnstat->createUser($_REQUEST['username'], $_REQUEST['password'], $_REQUEST['first_name'], $last_name, $_REQUEST['role']);
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'Missing arguments';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -36,10 +39,12 @@ switch ($_REQUEST['func']) {
         $alias = !empty($_REQUEST['alias']) ? $_REQUEST['alias'] : null;
         $output['success'] = $vnstat->createInterface($_REQUEST['name'], $alias);
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'No name supplied';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -52,10 +57,12 @@ switch ($_REQUEST['func']) {
         $output['success'] = $vnstat->updateUser($_REQUEST['user_id'], $_REQUEST['username'], $password, $_REQUEST['first_name'], $last_name, $_REQUEST['role']);
         $log['user_id'] = $_REQUEST['user_id'];
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'Missing arguments';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -67,10 +74,12 @@ switch ($_REQUEST['func']) {
         $output['success'] = $vnstat->updateInterface($_REQUEST['interface_id'], $alias);
         $log['interface_id'] = $_REQUEST['interface_id'];
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'No interface id supplied';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -82,10 +91,12 @@ switch ($_REQUEST['func']) {
         $log['action'] = $_REQUEST['action'];
         $log['user_id'] = $_REQUEST['user_id'];
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'Missing arguments';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -97,10 +108,12 @@ switch ($_REQUEST['func']) {
         $log['action'] = $_REQUEST['action'];
         $log['interface_id'] = $_REQUEST['interface_id'];
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'Missing arguments';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -116,10 +129,12 @@ switch ($_REQUEST['func']) {
           $log['user_id'] = $_REQUEST['user_id'];
         }
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'No user id supplied';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -135,10 +150,12 @@ switch ($_REQUEST['func']) {
           $log['interface_id'] = $_REQUEST['interface_id'];
         }
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'No interface id supplied';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
@@ -154,10 +171,12 @@ switch ($_REQUEST['func']) {
           $log['interface_id'] = $_REQUEST['interface_id'];
         }
       } else {
+        header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
         $output['message'] = 'Missing arguments';
       }
     } else {
+      header('HTTP/1.1 403 Forbidden');
       $output['success'] = false;
       $output['message'] = 'Unauthorized';
     }
