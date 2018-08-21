@@ -22,6 +22,7 @@ if [ -f ${pidfile} ]; then
 fi
 
 $(which vnstatd) \
+    --daemon \
     --group www-data \
     --user www-data
 
