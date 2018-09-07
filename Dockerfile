@@ -1,5 +1,7 @@
 FROM bmoorman/ubuntu:bionic AS builder
 
+ENV HTTPD_PORT="1477"
+
 ARG DEBIAN_FRONTEND="noninteractive"
 
 WORKDIR /opt/vnstat
@@ -34,15 +36,8 @@ RUN echo 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' > /et
     rewrite \
     ssl \
  && sed --in-place --regexp-extended \
-    --expression '/Listen\s+80/s/80/47080/' \
-    --expression '/Listen\s+443/s/443/47443/' \
-    /etc/apache2/ports.conf \
- && sed --in-place --regexp-extended \
-    --expression '/<VirtualHost \*:80>/s/80/47080/' \
-    /etc/apache2/sites-available/000-default.conf \
- && sed --in-place --regexp-extended \
-    --expression '/<VirtualHost _default_:443>/s/443/47443/' \
-    /etc/apache2/sites-available/default-ssl.conf \
+    --expression 's/^(Include\s+ports\.conf)$/#\1/' \
+    /etc/apache2/apache2.conf \
  && apt-get autoremove --yes --purge \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -54,8 +49,8 @@ COPY htdocs/ /var/www/html/
 
 VOLUME /config /var/lib/vnstat
 
-EXPOSE 1477
+EXPOSE ${HTTPD_PORT}
 
 CMD ["/etc/apache2/start.sh"]
 
-HEALTHCHECK --interval=60s --timeout=5s CMD curl --silent --location --fail http://localhost:47080/ > /dev/null || exit 1
+HEALTHCHECK --interval=60s --timeout=5s CMD /etc/apache2/healthcheck.sh || exit 1
