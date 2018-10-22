@@ -11,7 +11,7 @@ RUN apt-get update \
     build-essential \
     curl \
     libsqlite3-dev \
- && curl --silent --location "https://github.com/vergoh/vnstat/archive/master.tar.gz" | tar xz --strip-components 1 \
+ && curl --silent --location "https://humdi.net/vnstat/vnstat-latest.tar.gz" | tar xz --strip-components 1 \
  && ./configure && make
 
 FROM bmoorman/ubuntu:bionic
