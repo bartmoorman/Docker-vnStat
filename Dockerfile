@@ -1,7 +1,5 @@
 FROM bmoorman/ubuntu:bionic AS builder
 
-ENV HTTPD_PORT="1477"
-
 ARG DEBIAN_FRONTEND="noninteractive"
 
 WORKDIR /opt/vnstat
@@ -16,7 +14,8 @@ RUN apt-get update \
 
 FROM bmoorman/ubuntu:bionic
 
-ENV HTTPD_SERVERNAME="localhost"
+ENV HTTPD_SERVERNAME="localhost" \
+    HTTPD_PORT="1477"
 
 ARG DEBIAN_FRONTEND="noninteractive"
 
