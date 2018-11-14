@@ -2,7 +2,7 @@
 chown www-data: /config
 
 if [ ! -d /config/sessions ]; then
-    install -o www-data -g www-data -d /config/sessions
+    install --owner www-data --group www-data --directory /config/sessions
 fi
 
 if [ ! -d /config/httpd/ssl ]; then

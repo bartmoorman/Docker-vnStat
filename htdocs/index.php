@@ -48,13 +48,13 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
           data: {
             datasets: [{
               label: 'Receive',
-              backgroundColor: 'rgba(255, 0, 0, 0.3)',
-              borderColor: 'rgb(255, 0, 0)',
+              backgroundColor: 'rgba(30, 144, 255, 0.3)',
+              borderColor: 'rgb(30, 144, 255)',
               borderWidth: 2
             }, {
               label: 'Send',
-              backgroundColor: 'rgba(0, 0, 255, 0.3)',
-              borderColor: 'rgb(0, 0, 255)',
+              backgroundColor: 'rgba(255, 0, 0, 0.3)',
+              borderColor: 'rgb(255, 0, 0)',
               borderWidth: 2
             }]
           },
