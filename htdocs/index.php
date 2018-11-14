@@ -19,7 +19,7 @@ include_once('header.php');
     <canvas id='chart'></canvas>
     <nav class='navbar text-center'>
       <select class='btn btn-sm btn-outline-success ml-auto mr-2 id-interface_id' data-storage='interface_id'>
-        <option value='0'>Interface</option>
+        <option value='0'>-- Interface --</option>
 <?php
 foreach ($vnstat->getInterfaces() as $interface) {
   echo "        <option value='{$interface['interface_id']}'>{$interface['alias']} ({$interface['name']})</option>" . PHP_EOL;
@@ -27,7 +27,7 @@ foreach ($vnstat->getInterfaces() as $interface) {
 ?>
       </select>
       <select class='btn btn-sm btn-outline-success mr-auto id-granularity' data-storage='granularity'>
-        <option value=''>Granularity</option>
+        <option value=''>-- Granularity --</option>
 <?php
 foreach (array_keys($vnstat->granularities) as $granularity) {
   echo "        <option value='{$granularity}'>{$granularity}</option>" . PHP_EOL;
