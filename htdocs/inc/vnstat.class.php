@@ -141,6 +141,26 @@ EOQ;
     return false;
   }
 
+  public function resolveObject($type, $value) {
+    $type = $this->dbConn->escapeString($type);
+    $value = $this->dbConn->escapeString($value);
+    switch ($type) {
+      case 'token':
+        $column = 'app_id';
+        $table = 'apps';
+        break;
+    }
+    $query = <<<EOQ
+SELECT `{$column}`
+FROM `{$table}`
+WHERE `{$type}` = '{$value}';
+EOQ;
+    if ($object_id = $this->dbConn->querySingle($query)) {
+      return $object_id;
+    }
+    return false;
+  }
+
   public function authenticateSession($username, $password) {
     if ($this->isValidCredentials($username, $password)) {
       $username = $this->dbConn->escapeString($username);
@@ -367,8 +387,8 @@ EOQ;
     return false;
   }
 
-  public function putEvent($action, $message = []) {
-    $user_id = array_key_exists('authenticated', $_SESSION) ? $_SESSION['user_id'] : null;
+  public function putEvent($user_id, $action, $message = []) {
+    $user_id = $this->dbConn->escapeString($user_id);
     $action = $this->dbConn->escapeString($action);
     $message = $this->dbConn->escapeString(json_encode($message));
     $remote_addr = ip2long(array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
@@ -376,6 +396,22 @@ EOQ;
 INSERT
 INTO `events` (`user_id`, `action`, `message`, `remote_addr`)
 VALUES ('{$user_id}', '{$action}', '{$message}', '{$remote_addr}');
+EOQ;
+    if ($this->dbConn->exec($query)) {
+      return true;
+    }
+    return false;
+  }
+
+  public function putCall($token, $action, $message = []) {
+    $app_id = $this->resolveObject('token', $token);
+    $action = $this->dbConn->escapeString($action);
+    $message = $this->dbConn->escapeString(json_encode($message));
+    $remote_addr = ip2long(array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
+    $query = <<<EOQ
+INSERT
+INTO `calls` (`app_id`, `action`, `message`, `remote_addr`)
+VALUES ('{$app_id}', '{$action}', '{$message}', '{$remote_addr}');
 EOQ;
     if ($this->dbConn->exec($query)) {
       return true;
