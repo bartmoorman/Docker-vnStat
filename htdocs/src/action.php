@@ -49,6 +49,24 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
+  case 'createApp':
+    if ($dashboard->isValidSession() && $dashboard->isAdmin()) {
+      if (!empty($_REQUEST['name'])) {
+        $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : null;
+        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
+        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
+        $output['success'] = $dashboard->createApp($_REQUEST['name'], $token, $begin, $end);
+      } else {
+        header('HTTP/1.1 400 Bad Request');
+        $output['success'] = false;
+        $output['message'] = 'No name supplied';
+      }
+    } else {
+      header('HTTP/1.1 403 Forbidden');
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
   case 'updateUser':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
       if (!empty($_REQUEST['user_id']) && !empty($_REQUEST['username']) && !empty($_REQUEST['first_name']) && !empty($_REQUEST['role'])) {
@@ -84,12 +102,31 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
-  case 'modifyUser':
+  case 'updateApp':
+    if ($dashboard->isValidSession() && $dashboard->isAdmin()) {
+      if (!empty($_REQUEST['app_id']) && !empty($_REQUEST['name']) && !empty($_REQUEST['token'])) {
+        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
+        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
+        $output['success'] = $dashboard->updateApp($_REQUEST['app_id'], $_REQUEST['name'], $_REQUEST['token'], $begin, $end);
+        $log['app_id'] = $_REQUEST['app_id'];
+      } else {
+        header('HTTP/1.1 400 Bad Request');
+        $output['success'] = false;
+        $output['message'] = 'Missing arguments';
+      }
+    } else {
+      header('HTTP/1.1 403 Forbidden');
+      $output['success'] = false;
+      $output['message'] = 'Unauthorized';
+    }
+    break;
+  case 'modifyObject':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['action']) && !empty($_REQUEST['user_id'])) {
-        $output['success'] = $vnstat->modifyUser($_REQUEST['action'], $_REQUEST['user_id']);
+      if (!empty($_REQUEST['action']) && !empty($_REQUEST['type']) && !empty($_REQUEST['value'])) {
+        $output['success'] = $vnstat->modifyObject($_REQUEST['action'], $_REQUEST['type'], $_REQUEST['value']);
         $log['action'] = $_REQUEST['action'];
-        $log['user_id'] = $_REQUEST['user_id'];
+        $log['type'] = $_REQUEST['type'];
+        $log['value'] = $_REQUEST['value'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -118,20 +155,21 @@ switch ($_REQUEST['func']) {
       $output['message'] = 'Unauthorized';
     }
     break;
-  case 'getUserDetails':
+  case 'getObjectDetails':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['user_id'])) {
-        if ($output['data'] = $vnstat->getUserDetails($_REQUEST['user_id'])) {
+      if (!empty($_REQUEST['type']) && !empty($_REQUEST['value'])) {
+        if ($output['data'] = $vnstat->getObjectDetails($_REQUEST['type'], $_REQUEST['value'])) {
           $output['success'] = true;
           $putEvent = false;
         } else {
           $output['success'] = false;
-          $log['user_id'] = $_REQUEST['user_id'];
+          $log['type'] = $_REQUEST['type'];
+          $log['value'] = $_REQUEST['value'];
         }
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
-        $output['message'] = 'No user id supplied';
+        $output['message'] = 'Missing arguments';
       }
     } else {
       header('HTTP/1.1 403 Forbidden');

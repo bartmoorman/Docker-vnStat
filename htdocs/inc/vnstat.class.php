@@ -78,6 +78,22 @@ CREATE TABLE IF NOT EXISTS `events` (
   `message` BLOB,
   `remote_addr` INTEGER
 );
+CREATE TABLE IF NOT EXISTS `apps` (
+  `app_id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `name` TEXT NOT NULL,
+  `token` TEXT NOT NULL UNIQUE,
+  `begin` INTEGER,
+  `end` INTEGER,
+  `disabled` INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS `calls` (
+  `call_id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `date` INTEGER DEFAULT (STRFTIME('%s', 'now')),
+  `app_id` INTEGER NOT NULL,
+  `action` TEXT,
+  `message` BLOB,
+  `remote_addr` INTEGER
+);
 EOQ;
     if ($this->dbConn->exec($query)) {
       return true;
@@ -93,7 +109,7 @@ EOQ;
   }
 
   public function isValidSession() {
-    if (array_key_exists('authenticated', $_SESSION) && $this->isValidUser('user_id', $_SESSION['user_id'])) {
+    if (array_key_exists('authenticated', $_SESSION) && $this->isValidObject('user_id', $_SESSION['user_id'])) {
       return true;
     }
     return false;
@@ -126,12 +142,22 @@ EOQ;
     return false;
   }
 
-  public function isValidUser($type, $value) {
+  public function isValidObject($type, $value) {
     $type = $this->dbConn->escapeString($type);
     $value = $this->dbConn->escapeString($value);
+    switch ($type) {
+      case 'username':
+      case 'user_id':
+        $table = 'users';
+        break;
+      case 'token':
+      case 'app_id':
+        $table = 'apps';
+        break;
+    }
     $query = <<<EOQ
 SELECT COUNT(*)
-FROM `users`
+FROM `{$table}`
 WHERE `{$type}` = '{$value}'
 AND NOT `disabled`;
 EOQ;
@@ -230,6 +256,29 @@ EOQ;
     return false;
   }
 
+  public function createApp($name, $token = null, $begin = null, $end = null) {
+    $token = !$token ? bin2hex(random_bytes(8)) : $this->dbConn->escapeString($token);
+    $query = <<<EOQ
+SELECT COUNT(*)
+FROM `apps`
+WHERE `token` = '{$token}';
+EOQ;
+    if (!$this->dbConn->querySingle($query)) {
+      $name = $this->dbConn->escapeString($name);
+      $begin = $this->dbConn->escapeString($begin);
+      $end = $this->dbConn->escapeString($end);
+      $query = <<<EOQ
+INSERT
+INTO `apps` (`name`, `token`, `begin`, `end`)
+VALUES ('{$name}', '{$token}', STRFTIME('%s','{$begin}',) STRFTIME('%s','{$end}'));
+EOQ;
+      if ($this->dbConn->exec($query)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public function updateUser($user_id, $username, $password = null, $first_name, $last_name = null, $role) {
     $user_id = $this->dbConn->escapeString($user_id);
     $username = $this->dbConn->escapeString($username);
@@ -281,31 +330,75 @@ EOQ;
     return false;
   }
 
-  public function modifyUser($action, $user_id) {
-    $user_id = $this->dbConn->escapeString($user_id);
+  public function updateApp($app_id, $name, $token, $begin, $end) {
+    $app_id = $this->dbConn->escapeString($app_id);
+    $token = $this->dbConn->escapeString($token);
+    $query = <<<EOQ
+SELECT COUNT(*)
+FROM `apps`
+WHERE `app_id` != '{$app_id}'
+AND `token` = '{$token}';
+EOQ;
+    if (!$this->dbConn->querySingle($query)) {
+      $name = $this->dbConn->escapeString($name);
+      $begin = $this->dbConn->escapeString($begin);
+      $end = $this->dbConn->escapeString($end);
+      $query = <<<EOQ
+UPDATE `apps`
+SET
+  `name` = '{$name}',
+  `token` = '{$token}',
+  `begin` = STRFTIME('%s', '{$begin}'),
+  `end` = STRFTIME('%s', '{$end}')
+WHERE `app_id` = '{$app_id}';
+EOQ;
+      if ($this->dbConn->exec($query)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function modifyObject($action, $type, $value, $extra_type = null, $extra_value = null) {
+    $type = $this->dbConn->escapeString($type);
+    $value = $this->dbConn->escapeString($value);
+    $extra_type = $this->dbConn->escapeString($extra_type);
+    $extra_value = $this->dbConn->escapeString($extra_value);
+    switch ($type) {
+      case 'username':
+      case 'user_id':
+        $table = 'users';
+        $extra_table = 'events';
+        break;
+      case 'token':
+      case 'app_id':
+        $table = 'apps';
+        $extra_table = 'calls';
+        break;
+    }
     switch ($action) {
       case 'enable':
         $query = <<<EOQ
-UPDATE `users`
+UPDATE `{$table}`
 SET `disabled` = '0'
-WHERE `user_id` = '{$user_id}';
+WHERE `{$type}` = '{$value}';
 EOQ;
         break;
       case 'disable':
         $query = <<<EOQ
 UPDATE `users`
 SET `disabled` = '1'
-WHERE `user_id` = '{$user_id}';
+WHERE `{$type}` = '{$value}';
 EOQ;
         break;
       case 'delete':
         $query = <<<EOQ
 DELETE
-FROM `users`
-WHERE `user_id` = '{$user_id}';
+FROM `{$table}`
+WHERE `{$type}` = '{$value}';
 DELETE
-FROM `events`
-WHERE `user_id` = '{$user_id}';
+FROM `{$extra_table}`
+WHERE `{$type}` = '{$value}';
 EOQ;
         break;
     }
@@ -346,31 +439,53 @@ EOQ;
     return false;
   }
 
-  public function getUsers() {
-    $query = <<<EOQ
+  public function getObjects($type) {
+    switch ($type) {
+      case 'users':
+        $query = <<<EOQ
 SELECT `user_id`, `username`, `first_name`, `last_name`, `role`, `disabled`
 FROM `users`
-ORDER BY `last_name`, `first_name`
+ORDER BY `last_name`, `first_name`;
 EOQ;
-    if ($users = $this->dbConn->query($query)) {
+        break;
+      case 'apps':
+        $query = <<<EOQ
+SELECT `app_id`, `name`, `token`, `begin`, `end`, `disabled`
+FROM `apps`
+ORDER BY `name`;
+EOQ;
+        break;
+    }
+    if ($objects = $this->dbConn->query($query)) {
       $output = [];
-      while ($user = $users->fetchArray(SQLITE3_ASSOC)) {
-        $output[] = $user;
+      while ($object = $users->fetchArray(SQLITE3_ASSOC)) {
+        $output[] = $object;
       }
       return $output;
     }
     return false;
   }
 
-  public function getUserDetails($user_id) {
-    $user_id = $this->dbConn->escapeString($user_id);
-    $query = <<<EOQ
+  public function getObjectDetails($type, $value) {
+    $value = $this->dbConn->escapeString($value);
+    switch ($type) {
+      case 'user':
+        $query = <<<EOQ
 SELECT `user_id`, `username`, `first_name`, `last_name`, `role`, `disabled`
 FROM `users`
-WHERE `user_id` = '{$user_id}';
+WHERE `user_id` = '{$value}';
 EOQ;
-    if ($user = $this->dbConn->querySingle($query, true)) {
-      return $user;
+        break;
+      case 'app':
+        $query = <<<EOQ
+SELECT `app_id`, `name`, `token`, STRFTIME('%Y-%m-%dT%H:%M', `begin`, 'unixepoch') AS `begin`, STRFTIME('%Y-%m-%dT%H:%M', `end`, 'unixepoch') AS `end`, `disabled`
+FROM `apps`
+WHERE `app_id` = '{$value}';
+EOQ;
+        break;
+    }
+    if ($object = $this->dbConn->querySingle($query, true)) {
+      return $object;
     }
     return false;
   }
