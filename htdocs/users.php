@@ -25,12 +25,16 @@ include_once('header.php');
             <th>Username</th>
             <th>User Name</th>
             <th>Role</th>
+            <th>Begin</th>
+            <th>End</th>
           </tr>
         </thead>
         <tbody>
 <?php
 foreach ($vnstat->getObjects('users') as $user) {
   $user_name = !empty($user['last_name']) ? sprintf('%2$s, %1$s', $user['first_name'], $user['last_name']) : $user['first_name'];
+  $begin = !empty($user['begin']) ? date('m/d/Y, h:i A', $user['begin']) : '&infin;';
+  $end = !empty($user['end']) ? date('m/d/Y, h:i A', $user['end']) : '&infin;';
   $tableClass = $user['disabled'] ? 'text-warning' : 'table-default';
   echo "          <tr class='{$tableClass}'>" . PHP_EOL;
   echo "            <td><button type='button' class='btn btn-sm btn-outline-info id-details' data-user_id='{$user['user_id']}'>Details</button></td>" . PHP_EOL;
@@ -38,6 +42,8 @@ foreach ($vnstat->getObjects('users') as $user) {
   echo "            <td>{$user['username']}</td>" . PHP_EOL;
   echo "            <td>{$user_name}</td>" . PHP_EOL;
   echo "            <td>{$user['role']}</td>" . PHP_EOL;
+  echo "            <td>{$begin}</td>" . PHP_EOL;
+  echo "            <td>{$end}</td>" . PHP_EOL;
   echo "          </tr>" . PHP_EOL;
 }
 ?>
@@ -79,6 +85,16 @@ foreach ($vnstat->getObjects('users') as $user) {
                     <option value='user'>user</option>
                     <option value='admin'>admin</option>
                   </select>
+                </div>
+              </div>
+              <div class='form-row'>
+                <div class='form-group col'>
+                  <label>Begin</label>
+                  <input class='form-control' id='begin' type='datetime-local' name='begin'>
+                </div>
+                <div class='form-group col'>
+                  <label>End</label>
+                  <input class='form-control' id='end' type='datetime-local' name='end'>
                 </div>
               </div>
             </div>
@@ -125,6 +141,8 @@ foreach ($vnstat->getObjects('users') as $user) {
                 $('#first_name').val(user.first_name);
                 $('#last_name').val(user.last_name);
                 $('#role').val(user.role);
+                $('#begin').val(user.begin);
+                $('#end').val(user.end);
                 $('button.id-modify.id-volatile').data('action', user.disabled ? 'enable' : 'disable').text(user.disabled ? 'Enable' : 'Disable');
                 $('button.id-modify').data('user_id', user.user_id);
                 $('div.id-modal').modal('toggle');
@@ -151,7 +169,7 @@ foreach ($vnstat->getObjects('users') as $user) {
 
         $('form').submit(function(e) {
           e.preventDefault();
-          $.post('src/action.php', {"func": $(this).data('func'), "user_id": $(this).data('user_id'), "username": $('#username').val(), "password": $('#password').val(), "first_name": $('#first_name').val(), "last_name": $('#last_name').val(), "role": $('#role').val()})
+          $.post('src/action.php', {"func": $(this).data('func'), "user_id": $(this).data('user_id'), "username": $('#username').val(), "password": $('#password').val(), "first_name": $('#first_name').val(), "last_name": $('#last_name').val(), "role": $('#role').val(), "begin": $('#begin').val(), "end": $('#end').val()})
             .done(function(data) {
               if (data.success) {
                 location.reload();
