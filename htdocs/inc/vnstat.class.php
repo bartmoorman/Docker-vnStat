@@ -11,6 +11,8 @@ class vnStat {
     session_start([
       'save_path' => '/config/sessions',
       'name' => '_sess_vnstat',
+      'gc_probability' => 1,
+      'gc_divisor' => 1000,
       'gc_maxlifetime' => 60 * 60 * 24 * 7,
       'cookie_lifetime' => 60 * 60 * 24 * 7,
       'cookie_secure' => true,
