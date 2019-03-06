@@ -3,7 +3,6 @@
 docker run \
 --detach \
 --name vnstat \
---init \
 --network host \
 --env "HTTPD_SERVERNAME=**sub.do.main**" \
 --volume vnstat-config:/config \
@@ -24,7 +23,6 @@ services:
     volumes:
       - vnstat-config:/config
       - vnstat-data:/var/lib/vnstat
-    init: true
 
 volumes:
   vnstat-config:

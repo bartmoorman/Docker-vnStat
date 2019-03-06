@@ -24,7 +24,7 @@ fi
 $(which vnstatd) \
     --daemon \
     --group www-data \
-    --user www-data
+    --user www-data &
 
 exec $(which apache2ctl) \
     -D FOREGROUND \
