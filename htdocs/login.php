@@ -18,14 +18,12 @@ $vnstat = new vnStat(true, false, false, true);
             <div class='modal-body'>
               <div class='form-row'>
                 <div class='form-group col'>
-                  <label>Username</label>
-                  <input class='form-control form-control-lg' id='username' type='text' name='username' autofocus required>
+                  <input class='form-control form-control-lg' id='username' type='text' name='username' placeholder='Username' autofocus required>
                 </div>
               </div>
               <div class='form-row'>
-                <div class='form-group col'>
-                  <label>Password</label>
-                  <input class='form-control form-control-lg' id='password' type='password' name='password' required>
+                <div class='form-group mb-0 col'>
+                  <input class='form-control form-control-lg' id='password' type='password' name='password' placeholder='Password' required>
                 </div>
               </div>
             </div>
