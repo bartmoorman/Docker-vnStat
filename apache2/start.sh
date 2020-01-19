@@ -6,7 +6,7 @@ if [ ! -d /config/sessions ]; then
 fi
 
 if [ ! -d /config/httpd/ssl ]; then
-    mkdir --parents /config/httpd/ssl
+    install --directory /config/httpd/ssl
     ln --symbolic --force /etc/ssl/certs/ssl-cert-snakeoil.pem /config/httpd/ssl/vnstat.crt
     ln --symbolic --force /etc/ssl/private/ssl-cert-snakeoil.key /config/httpd/ssl/vnstat.key
 fi
