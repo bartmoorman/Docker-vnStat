@@ -41,8 +41,7 @@ RUN echo 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' > /et
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=builder /opt/vnstat/vnstat /usr/bin/
-COPY --from=builder /opt/vnstat/vnstatd /usr/sbin/
+COPY --from=builder /opt/vnstat/vnstat* /usr/sbin/
 COPY apache2/ /etc/apache2/
 COPY htdocs/ /var/www/html/
 
