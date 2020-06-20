@@ -16,7 +16,7 @@ $vnstat = new vnStat(true, false, false, true);
         <div class='modal-content'>
           <form>
             <div class='modal-header py-2'>
-              <h3 class='modal-title w-100 text-center'>vnStat</h3>
+              <h3 class='modal-title w-100 text-center'><?php echo $vnstat->appName ?></h3>
             </div>
             <div class='modal-body'>
               <div class='form-row'>
