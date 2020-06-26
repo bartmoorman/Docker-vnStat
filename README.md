@@ -3,6 +3,7 @@
 docker run \
 --detach \
 --name vnstat \
+--restart unless-stopped \
 --network host \
 --volume vnstat-config:/config \
 --volume vnstat-data:/var/lib/vnstat \
@@ -16,7 +17,8 @@ services:
   vnstat:
     image: bmoorman/vnstat:latest
     container_name: vnstat
-    network_mode: "host"
+    restart: unless-stopped
+    network_mode: host
     volumes:
       - vnstat-config:/config
       - vnstat-data:/var/lib/vnstat
