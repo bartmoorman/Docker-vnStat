@@ -1,6 +1,6 @@
 FROM bmoorman/ubuntu:bionic AS builder
 
-ARG DEBIAN_FRONTEND="noninteractive"
+ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /opt/vnstat
 
@@ -14,10 +14,10 @@ RUN apt-get update \
 
 FROM bmoorman/ubuntu:bionic
 
-ENV HTTPD_SERVERNAME="localhost" \
-    HTTPD_PORT="1477"
+ARG DEBIAN_FRONTEND=noninteractive
 
-ARG DEBIAN_FRONTEND="noninteractive"
+ENV HTTPD_SERVERNAME=localhost \
+    HTTPD_PORT=1477
 
 RUN echo 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' > /etc/apt/sources.list.d/certbot.list \
  && echo 'deb-src http://ppa.launchpad.net/certbot/certbot/ubuntu bionic main' >> /etc/apt/sources.list.d/certbot.list \

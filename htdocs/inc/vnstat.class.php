@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set(getenv('TZ'));
+
 class vnStat {
   public $appName = 'vnStat';
   private $dbFile = '/config/vnstat.db';

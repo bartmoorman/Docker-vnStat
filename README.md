@@ -4,7 +4,6 @@ docker run \
 --detach \
 --name vnstat \
 --network host \
---env "HTTPD_SERVERNAME=**sub.do.main**" \
 --volume vnstat-config:/config \
 --volume vnstat-data:/var/lib/vnstat \
 bmoorman/vnstat:latest
@@ -18,8 +17,6 @@ services:
     image: bmoorman/vnstat:latest
     container_name: vnstat
     network_mode: "host"
-    environment:
-      - HTTPD_SERVERNAME=**sub.do.main**
     volumes:
       - vnstat-config:/config
       - vnstat-data:/var/lib/vnstat
@@ -28,3 +25,10 @@ volumes:
   vnstat-config:
   vnstat-data:
 ```
+
+### Environment Variables
+* **TZ** Sets the timezone. Default `America/Denver`.
+* **HTTPD_SERVERNAME** Sets the vhost servername. Default `localhost`.
+* **HTTPD_PORT** Sets the vhost port. Default `1477`.
+* **HTTPD_SSL** Set to anything other than `SSL` (e.g. `NO_SSL`) to disable SSL. Default `SSL`.
+* **HTTPD_REDIRECT** Set to anything other than `REDIRECT` (e.g. `NO_REDIRECT`) to disable SSL redirect. Default `REDIRECT`.
