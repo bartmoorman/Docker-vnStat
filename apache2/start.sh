@@ -16,8 +16,8 @@ pidfile=/var/run/apache2/apache2.pid
 if [ -f ${pidfile} ]; then
     pid=$(cat ${pidfile})
 
-    if [ ! -d /proc/${pid} ] || [[ -d /proc/${pid} && $(basename $(readlink /proc/${pid}/exe)) != 'apache2' ]]; then
-      rm ${pidfile}
+    if [ ! -d /proc/${pid} ] || [ -d /proc/${pid} -a $(basename $(readlink /proc/${pid}/exe)) != 'apache2' ]; then
+        rm ${pidfile}
     fi
 fi
 
