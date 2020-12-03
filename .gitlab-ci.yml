@@ -1,0 +1,13 @@
+stages:
+  - build
+  - deploy
+
+build_image:
+  stage: build
+  script:
+    - docker build --tag ${GITLAB_USER_LOGIN}/${CI_PROJECT_NAME,,}:${CI_COMMIT_REF_NAME} .
+
+deploy_image:
+  stage: deploy
+  script:
+    - docker push ${GITLAB_USER_LOGIN}/${CI_PROJECT_NAME,,}:${CI_COMMIT_REF_NAME}
