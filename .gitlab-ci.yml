@@ -1,13 +1,20 @@
-stages:
-  - build
-  - deploy
+image: docker:stable
 
-build_image:
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - docker:stable-dind
+
+before_script:
+  - docker login --username ${DOCKER_HUB_USERNAME} --password ${DOCKER_HUB_PASSWORD}
+  - docker login --username ${CI_REGISTRY_USER} --password ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
+build:
   stage: build
+  tags:
+    - docker
   script:
-    - docker build --tag ${GITLAB_USER_LOGIN}/${CI_PROJECT_NAME,,}:${CI_COMMIT_REF_NAME} .
-
-deploy_image:
-  stage: deploy
-  script:
-    - docker push ${GITLAB_USER_LOGIN}/${CI_PROJECT_NAME,,}:${CI_COMMIT_REF_NAME}
+    - docker build --pull --tag ${DOCKER_HUB_USERNAME}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} --tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG} .
+    - docker push ${DOCKER_HUB_USERNAME}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}
