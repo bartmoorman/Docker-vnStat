@@ -474,7 +474,7 @@ EOQ;
     }
     if ($objects = $this->dbConn->query($query)) {
       $output = [];
-      while ($object = $users->fetchArray(SQLITE3_ASSOC)) {
+      while ($object = $objects->fetchArray(SQLITE3_ASSOC)) {
         $output[] = $object;
       }
       return $output;

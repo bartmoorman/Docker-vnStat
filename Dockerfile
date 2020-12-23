@@ -1,17 +1,3 @@
-FROM bmoorman/ubuntu:focal AS builder
-
-ARG DEBIAN_FRONTEND=noninteractive
-
-WORKDIR /opt/vnstat
-
-RUN apt-get update \
- && apt-get install --yes --no-install-recommends \
-    build-essential \
-    curl \
-    libsqlite3-dev \
- && curl --silent --location "https://humdi.net/vnstat/vnstat-latest.tar.gz" | tar xz --strip-components 1 \
- && ./configure && make
-
 FROM bmoorman/ubuntu:focal
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -26,6 +12,7 @@ RUN apt-get update \
     libapache2-mod-php \
     php-sqlite3 \
     ssl-cert \
+    vnstat \
     wget \
  && a2enmod \
     remoteip \
@@ -40,7 +27,6 @@ RUN apt-get update \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=builder /opt/vnstat/vnstat* /usr/sbin/
 COPY apache2/ /etc/apache2/
 COPY htdocs/ /var/www/html/
 
