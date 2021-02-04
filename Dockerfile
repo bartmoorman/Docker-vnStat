@@ -8,12 +8,12 @@ ENV HTTPD_SERVERNAME=localhost \
 RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
     apache2 \
+    certbot \
     curl \
     libapache2-mod-php \
     php-sqlite3 \
     ssl-cert \
     vnstat \
-    wget \
  && a2enmod \
     remoteip \
     rewrite \
@@ -21,8 +21,6 @@ RUN apt-get update \
  && sed --in-place --regexp-extended \
     --expression 's|^(Include\s+ports\.conf)$|#\1|' \
     /etc/apache2/apache2.conf \
- && wget --quiet --directory-prefix /usr/local/bin "https://dl.eff.org/certbot-auto" \
- && chmod +x /usr/local/bin/certbot-auto \
  && apt-get autoremove --yes --purge \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
