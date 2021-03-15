@@ -149,7 +149,7 @@ foreach ($vnstat->getObjects('users') as $user) {
 
         $('button.id-modify').click(function() {
           if (confirm(`Want to ${$(this).data('action').toUpperCase()} user ${$(this).data('user_id')}?`)) {
-            $.get('src/action.php', {"func": "modifyObject", "action": $(this).data('action'), "type": "user_id", "value": $(this).data('user_id')})
+            $.post('src/action.php', {"func": "modifyObject", "action": $(this).data('action'), "type": "user_id", "value": $(this).data('user_id')})
               .done(function(data) {
                 if (data.success) {
                   location.reload();

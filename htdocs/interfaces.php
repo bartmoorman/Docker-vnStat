@@ -141,7 +141,7 @@ foreach ($vnstat->getInterfaces() as $interface) {
 
        $('button.id-modify').click(function() {
           if (confirm(`Want to ${$(this).data('action').toUpperCase()} interface ${$(this).data('interface_id')}?`)) {
-            $.get('src/action.php', {"func": "modifyInterface", "action": $(this).data('action'), "interface_id": $(this).data('interface_id')})
+            $.post('src/action.php', {"func": "modifyInterface", "action": $(this).data('action'), "interface_id": $(this).data('interface_id')})
               .done(function(data) {
                 if (data.success) {
                   location.reload();

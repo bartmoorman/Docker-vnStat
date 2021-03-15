@@ -570,35 +570,21 @@ EOQ;
   }
 
   public function formatBytes($bytes, $return_array = false) {
-    if ($bytes >= $this->formatBytes['base']) {
-      $multiple = floor(log($bytes) / log($this->formatBytes['base']));
-      $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
-      if ($return_array) {
-        return ['size' => $converted, 'unit' => $this->formatBytes['units'][$multiple], 'multiple' => $multiple];
-      } else {
-        return "{$converted} {$this->formatBytes['units'][$multiple]}";
-      }
-    }
+    $multiple = floor(log($bytes) / log($this->formatBytes['base']));
+    $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
     if ($return_array) {
-      return ['size' => $bytes, 'unit' => $this->formatBytes['units'][0], 'multiple' => 0];
+      return ['size' => $converted, 'unit' => $this->formatBytes['units'][$multiple], 'multiple' => $multiple];
     } else {
-      return "{$bytes} {$this->formatBytes['units'][0]}";
+      return "{$converted} {$this->formatBytes['units'][$multiple]}";
     }
   }
 
   public function reduceBytes($bytes, $multiple, $with_unit = false) {
-    if ($bytes > 0 && $multiple > 0) {
-      $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
-      if ($with_unit) {
-        return "{$converted} {$this->formatBytes['units'][$multiple]}";
-      } else {
-        return $converted;
-      }
-    }
+    $converted = round($bytes / pow($this->formatBytes['base'], $multiple), $this->formatBytes['decimals']);
     if ($with_unit) {
-      return "{$bytes} {$this->formatBytes['units'][$multiple]}";
+      return "{$converted} {$this->formatBytes['units'][$multiple]}";
     } else {
-      return $bytes;
+      return $converted;
     }
   }
 

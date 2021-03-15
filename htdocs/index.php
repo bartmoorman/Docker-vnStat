@@ -12,7 +12,9 @@ $vnstat = new vnStat(true, true, false, false);
   </head>
   <body>
 <?php require_once('header.php'); ?>
-    <canvas id='chart'></canvas>
+    <div class='container-fluid'>
+      <canvas id='chart'></canvas>
+    </div>
     <nav class='navbar text-center'>
       <select class='btn btn-sm btn-outline-success ml-auto mr-2 id-interface_id' data-storage='interface_id'>
         <option value='0'>-- Interface --</option>
@@ -80,7 +82,7 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
               }
             })
             .always(function() {
-              timer = setTimeout(getReadings, 5 * 1000);
+              timer = setTimeout(getReadings, 15 * 1000);
             });
         };
 

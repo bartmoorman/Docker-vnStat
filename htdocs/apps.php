@@ -123,7 +123,7 @@ foreach ($vnstat->getObjects('apps') as $app) {
 
         $('button.id-modify').click(function() {
           if (confirm(`Want to ${$(this).data('action').toUpperCase()} app ${$(this).data('app_id')}?`)) {
-            $.get('src/action.php', {"func": "modifyObject", "action": $(this).data('action'), "type": "app_id", "value": $(this).data('app_id')})
+            $.post('src/action.php', {"func": "modifyObject", "action": $(this).data('action'), "type": "app_id", "value": $(this).data('app_id')})
               .done(function(data) {
                 if (data.success) {
                   location.reload();
