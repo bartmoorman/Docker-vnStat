@@ -8,9 +8,10 @@ $putEvent = true;
 
 switch ($_REQUEST['func']) {
   case 'authenticateSession':
-    if (!empty($_REQUEST['username']) && !empty($_REQUEST['password'])) {
-      $output['success'] = $vnstat->authenticateSession($_REQUEST['username'], $_REQUEST['password']);
-      $log['username'] = $_REQUEST['username'];
+    if (!empty($_POST['username']) && !empty($_POST['password'])) {
+      $output['success'] = $vnstat->authenticateSession($_POST['username'], $_POST['password']);
+      $log['username'] = $_POST['username'];
+      usleep(rand(750000, 1000000));
     } else {
       header('HTTP/1.1 400 Bad Request');
       $output['success'] = false;
@@ -19,11 +20,11 @@ switch ($_REQUEST['func']) {
     break;
   case 'createUser':
     if (!$vnstat->isConfigured() || ($vnstat->isValidSession() && $vnstat->isAdmin())) {
-      if (!empty($_REQUEST['username']) && !empty($_REQUEST['password']) && !empty($_REQUEST['first_name']) && !empty($_REQUEST['role'])) {
-        $last_name = !empty($_REQUEST['last_name']) ? $_REQUEST['last_name'] : null;
-        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
-        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
-        $output['success'] = $vnstat->createUser($_REQUEST['username'], $_REQUEST['password'], $_REQUEST['first_name'], $last_name, $_REQUEST['role'], $begin, $end);
+      if (!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['first_name']) && !empty($_POST['role'])) {
+        $last_name = !empty($_POST['last_name']) ? $_POST['last_name'] : null;
+        $begin = !empty($_POST['begin']) ? $_POST['begin'] : null;
+        $end = !empty($_POST['end']) ? $_POST['end'] : null;
+        $output['success'] = $vnstat->createUser($_POST['username'], $_POST['password'], $_POST['first_name'], $last_name, $_POST['role'], $begin, $end);
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -37,9 +38,9 @@ switch ($_REQUEST['func']) {
     break;
   case 'createInterface':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['name'])) {
-        $alias = !empty($_REQUEST['alias']) ? $_REQUEST['alias'] : null;
-        $output['success'] = $vnstat->createInterface($_REQUEST['name'], $alias);
+      if (!empty($_POST['name'])) {
+        $alias = !empty($_POST['alias']) ? $_POST['alias'] : null;
+        $output['success'] = $vnstat->createInterface($_POST['name'], $alias);
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -53,11 +54,11 @@ switch ($_REQUEST['func']) {
     break;
   case 'createApp':
     if ($dashboard->isValidSession() && $dashboard->isAdmin()) {
-      if (!empty($_REQUEST['name'])) {
-        $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : null;
-        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
-        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
-        $output['success'] = $dashboard->createApp($_REQUEST['name'], $token, $begin, $end);
+      if (!empty($_POST['name'])) {
+        $token = isset($_POST['token']) ? $_POST['token'] : null;
+        $begin = !empty($_POST['begin']) ? $_POST['begin'] : null;
+        $end = !empty($_POST['end']) ? $_POST['end'] : null;
+        $output['success'] = $dashboard->createApp($_POST['name'], $token, $begin, $end);
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -71,13 +72,13 @@ switch ($_REQUEST['func']) {
     break;
   case 'updateUser':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['user_id']) && !empty($_REQUEST['username']) && !empty($_REQUEST['first_name']) && !empty($_REQUEST['role'])) {
-        $password = !empty($_REQUEST['password']) ? $_REQUEST['password'] : null;
-        $last_name = !empty($_REQUEST['last_name']) ? $_REQUEST['last_name'] : null;
-        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
-        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
-        $output['success'] = $vnstat->updateUser($_REQUEST['user_id'], $_REQUEST['username'], $password, $_REQUEST['first_name'], $last_name, $_REQUEST['role'], $begin, $end);
-        $log['user_id'] = $_REQUEST['user_id'];
+      if (!empty($_POST['user_id']) && !empty($_POST['username']) && !empty($_POST['first_name']) && !empty($_POST['role'])) {
+        $password = !empty($_POST['password']) ? $_POST['password'] : null;
+        $last_name = !empty($_POST['last_name']) ? $_POST['last_name'] : null;
+        $begin = !empty($_POST['begin']) ? $_POST['begin'] : null;
+        $end = !empty($_POST['end']) ? $_POST['end'] : null;
+        $output['success'] = $vnstat->updateUser($_POST['user_id'], $_POST['username'], $password, $_POST['first_name'], $last_name, $_POST['role'], $begin, $end);
+        $log['user_id'] = $_POST['user_id'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -91,10 +92,10 @@ switch ($_REQUEST['func']) {
     break;
   case 'updateInterface':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['interface_id'])) {
-        $alias = !empty($_REQUEST['alias']) ? $_REQUEST['alias'] : null;
-        $output['success'] = $vnstat->updateInterface($_REQUEST['interface_id'], $alias);
-        $log['interface_id'] = $_REQUEST['interface_id'];
+      if (!empty($_POST['interface_id'])) {
+        $alias = !empty($_POST['alias']) ? $_POST['alias'] : null;
+        $output['success'] = $vnstat->updateInterface($_POST['interface_id'], $alias);
+        $log['interface_id'] = $_POST['interface_id'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -108,11 +109,11 @@ switch ($_REQUEST['func']) {
     break;
   case 'updateApp':
     if ($dashboard->isValidSession() && $dashboard->isAdmin()) {
-      if (!empty($_REQUEST['app_id']) && !empty($_REQUEST['name']) && !empty($_REQUEST['token'])) {
-        $begin = !empty($_REQUEST['begin']) ? $_REQUEST['begin'] : null;
-        $end = !empty($_REQUEST['end']) ? $_REQUEST['end'] : null;
-        $output['success'] = $dashboard->updateApp($_REQUEST['app_id'], $_REQUEST['name'], $_REQUEST['token'], $begin, $end);
-        $log['app_id'] = $_REQUEST['app_id'];
+      if (!empty($_POST['app_id']) && !empty($_POST['name']) && !empty($_POST['token'])) {
+        $begin = !empty($_POST['begin']) ? $_POST['begin'] : null;
+        $end = !empty($_POST['end']) ? $_POST['end'] : null;
+        $output['success'] = $dashboard->updateApp($_POST['app_id'], $_POST['name'], $_POST['token'], $begin, $end);
+        $log['app_id'] = $_POST['app_id'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -126,11 +127,11 @@ switch ($_REQUEST['func']) {
     break;
   case 'modifyObject':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['action']) && !empty($_REQUEST['type']) && !empty($_REQUEST['value'])) {
-        $output['success'] = $vnstat->modifyObject($_REQUEST['action'], $_REQUEST['type'], $_REQUEST['value']);
-        $log['action'] = $_REQUEST['action'];
-        $log['type'] = $_REQUEST['type'];
-        $log['value'] = $_REQUEST['value'];
+      if (!empty($_POST['action']) && !empty($_POST['type']) && !empty($_POST['value'])) {
+        $output['success'] = $vnstat->modifyObject($_POST['action'], $_POST['type'], $_POST['value']);
+        $log['action'] = $_POST['action'];
+        $log['type'] = $_POST['type'];
+        $log['value'] = $_POST['value'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
@@ -144,10 +145,10 @@ switch ($_REQUEST['func']) {
     break;
   case 'modifyInterface':
     if ($vnstat->isValidSession() && $vnstat->isAdmin()) {
-      if (!empty($_REQUEST['action']) && !empty($_REQUEST['interface_id'])) {
-        $output['success'] = $vnstat->modifyInterface($_REQUEST['action'], $_REQUEST['interface_id']);
-        $log['action'] = $_REQUEST['action'];
-        $log['interface_id'] = $_REQUEST['interface_id'];
+      if (!empty($_POST['action']) && !empty($_POST['interface_id'])) {
+        $output['success'] = $vnstat->modifyInterface($_POST['action'], $_POST['interface_id']);
+        $log['action'] = $_POST['action'];
+        $log['interface_id'] = $_POST['interface_id'];
       } else {
         header('HTTP/1.1 400 Bad Request');
         $output['success'] = false;
