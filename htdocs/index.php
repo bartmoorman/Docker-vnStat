@@ -75,7 +75,7 @@ foreach (array_keys($vnstat->granularities) as $granularity) {
               }
             })
             .fail(function(jqxhr, textStatus, errorThrown) {
-              if (jqxhr.status == 403) {
+              if (jqxhr.status == 401) {
                 location.reload();
               } else {
                 console.log(`getReadings failed: ${jqxhr.status} (${jqxhr.statusText}), ${textStatus}, ${errorThrown}`);
