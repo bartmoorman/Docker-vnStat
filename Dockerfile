@@ -18,9 +18,14 @@ RUN apt-get update \
     remoteip \
     rewrite \
     ssl \
+ && a2dissite \
+    000-default \
  && sed --in-place --regexp-extended \
     --expression 's|^(Include\s+ports\.conf)$|#\1|' \
     /etc/apache2/apache2.conf \
+ && ln --symbolic --force /dev/stderr /var/log/apache2/error.log \
+ && ln --symbolic --force /dev/stdout /var/log/apache2/access.log \
+ && ln --symbolic --force /dev/stdout /var/log/apache2/other_vhosts_access.log \
  && apt-get autoremove --yes --purge \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* /tmp/* /var/tmp/*
