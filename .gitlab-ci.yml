@@ -5,6 +5,7 @@ variables:
 before_script:
   - docker login --username ${DOCKER_HUB_USER} --password ${DOCKER_HUB_PASSWORD}
   - docker login --username ${CI_REGISTRY_USER} --password ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  - docker run --rm --privileged multiarch/qemu-user-static --reset --persistent yes
 after_script:
   - docker logout
   - docker logout ${CI_REGISTRY}
