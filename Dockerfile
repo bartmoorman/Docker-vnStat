@@ -9,7 +9,6 @@ RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
     apache2 \
     certbot \
-    curl \
     libapache2-mod-php \
     php-sqlite3 \
     ssl-cert \
